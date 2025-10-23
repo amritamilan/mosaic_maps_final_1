@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=        .folder-card .label {
+      background: rgba(255,255,255,.78);
+      padding:.55rem .7rem; font-size:.95rem;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .entry-count {
+      background: #8A4FFF;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      margin-left: 8px;
+    }e-width, initial-scale=1.0"/>
+  <title>Mosaic Maps — My Space</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+
+  <style>
+    
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 600px at -10% 20%, #C3BEF7 10%, transparent 60%),
+                  radial-gradient(1200px 600px at 110% 80%, #C3BEF7 10%, transparent 60%),
+                  #fff;
+    }
+    main.shell {
+      background: #fff;
+      max-width: 1200px;
+      margin: 2rem auto;
+      border: 1px solid #E5ECF4;
+      border-radius: 16px;
+      padding: 2rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    
+    nav.site-nav {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1.25rem 2rem; background: #fff; border-bottom: 1px solid #E5ECF4;
+    }
+    .brand { display:flex; align-items:center; gap:.75rem; }
+    .brand img { height: 40px; width: auto; display:block; }
+    .nav-links { display:flex; gap:1.5rem; }
+    .nav-links a { color:#8A4FFF; text-decoration:none; font-weight:500; }
+    .nav-links a:hover { opacity:.85; }
+
+    
+    .page-wrap {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    /* folders panel */
+    .folders-header {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom: 1rem;
+    }
+    .folders-actions { display:flex; gap:.75rem; align-items:center; }
+    .btn {
+      border: 1px solid #E5ECF4; background: #EFFFFA;
+      padding: .55rem .9rem; border-radius: 10px; cursor: pointer; font-size: .95rem;
+    }
+    .btn.primary { background:#8A4FFF; color:#fff; border-color:#8A4FFF; transition: all 0.2s; }
+    .btn.primary:hover { background:#7335FF; transform: translateY(-1px); }
+    .btn.ghost { background:#fff; transition: all 0.2s; }
+    .btn.ghost:hover { background:#f5f5f5; transform: translateY(-1px); }
+
+    .folder-grid {
+      display:grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr));
+      gap: 1.2rem; margin-top: 1rem;
+    }
+    .folder-card {
+      user-select:none;
+      border-radius:10px;
+      min-height:110px;
+      display:grid;
+      grid-template-rows: auto 1fr auto;
+      box-shadow:0 4px 8px rgba(0,0,0,0.06);
+      overflow:hidden;
+      border:1px solid #E5ECF4;
+      background:#C3BEF7;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .folder-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+    }
+
+    .folder-card .entries {
+      padding: 0.75rem;
+      max-height: 200px;
+      overflow-y: auto;
+      background: rgba(255,255,255,0.9);
+    }
+
+    .folder-card .entry-item {
+      padding: 0.35rem 0.5rem;
+      margin-bottom: 0.25rem;
+      border-radius: 6px;
+      background: white;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .folder-card .entry-item:hover {
+      transform: translateY(-2px);
+      background: #f5f5f5;
+    }
+
+    .folder-card .entry-date {
+      font-size: 0.85rem;
+      color: #444;
+      text-align: center;
+    }
+    .folder-card[draggable="true"] { cursor: grab; }
+    .folder-card.dragging { opacity:.6; }
+    .folder-card .label {
+      background: rgba(255,255,255,.78);
+      padding:.55rem .7rem; font-size:.95rem;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .folder-card .label input {
+      border:none; background:transparent; font-size:.95rem; width:100%;
+      outline:none; color:#222;
+    }
+    .folder-card .tools { display:flex; gap:.4rem; align-items:center; margin-left:.75rem; }
+    .chip {
+      border:1px solid #E5ECF4; background:#fff; padding:.2rem .45rem; border-radius:999px;
+      font-size:.8rem; cursor:pointer;
+    }
+    .chip.palette { 
+      width:18px; 
+      height:18px; 
+      padding:0; 
+      border-radius:5px; 
+      border:1px solid rgba(0,0,0,.08);
+      transition: transform 0.2s;
+    }
+    .chip.palette:hover {
+      transform: scale(1.1);
+      border-color: rgba(0,0,0,0.2);
+    }
+    .chip.delete { color:#000; }
+    
+    .folder-actions {
+      padding: 0.75rem;
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      background: rgba(255,255,255,0.9);
+    }
+    
+    .folder-actions button {
+      font-size: 0.9rem;
+      padding: 0.4rem 0.8rem;
+    }
+
+    /* color swatches (brand palette) */
+    .swatch-purple { background:#8A4FFF; }
+    .swatch-lavender { background:#C3BEF7; }
+    .swatch-bluegrey { background:#E5ECF4; }
+    .swatch-mint { background:#EFFFFA; border:1px solid #C3BEF7; }
+
+    /* stats panel */
+    .stats-panel {
+      border:1px solid #E5ECF4; border-radius:12px; padding:1.25rem 1.25rem 1.5rem;
+      background:#fff; box-shadow:0 4px 8px rgba(0,0,0,0.04);
+    }
+    .stats-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:1rem; }
+    .stat-title { font-size:1.15rem; color:#222; }
+    .toggle {
+      background:#EFFFFA; border:1px solid #E5ECF4; border-radius:999px; overflow:hidden; display:inline-flex;
+    }
+    .toggle button { padding:.45rem .8rem; border:none; background:transparent; cursor:pointer; font-size:.9rem; }
+    .toggle button.active { background:#8A4FFF; color:#fff; }
+
+    .bars { display:grid; gap:.6rem; margin-top:.75rem; }
+    .bar-row { display:grid; grid-template-columns: 110px 1fr; gap:1rem; align-items:center; }
+    .bar-label { font-size:.9rem; color:#222; text-align:right; }
+    .bar-track { width:100%; height:18px; background:#E5ECF4; border-radius:10px; overflow:hidden; }
+    .bar-fill { height:100%; width:0; border-radius:10px; transition: width .5s ease; }
+
+    /* bar colors using brand palette */
+    .c-purple { background:#8A4FFF; }
+    .c-lavender { background:#C3BEF7; }
+    .c-bluegrey { background:#E5ECF4; }
+    .c-mint { background:#EFFFFA; border:1px solid #C3BEF7; }
+
+    .legend { display:flex; gap:.6rem; flex-wrap:wrap; margin-top:1rem; font-size:.85rem; }
+    .legend .key { display:flex; align-items:center; gap:.4rem; }
+    .legend .dot { width:12px; height:12px; border-radius:3px; border:1px solid #E5ECF4; }
+    .dot.purple { background:#8A4FFF; border-color:#8A4FFF; }
+    .dot.lavender { background:#C3BEF7; border-color:#C3BEF7; }
+    .dot.mint { background:#EFFFFA; border-color:#C3BEF7; }
+
+    @media (max-width: 980px) {
+      main.shell { margin: 0; border-radius: 0; }
+      .page-wrap { grid-template-columns: 1fr; }
+      nav.site-nav { padding: 1rem; }
+      main.shell { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- navbar with logo.png -->
+  <nav class="site-nav">
+    <div class="brand">
+      <img src="../images/logo.png" alt="Mosaic Maps Logo">
+    </div>
+    <div class="nav-links">
+      <a href="moodmap.html">mood map</a>
+      <a href="myspace.html">my space</a>
+      <a href="journal.html">journal</a>
+      <a href="../index.html">home</a>
+      <a href="login.html">login</a>
+    </div>
+  </nav>
+
+  <main class="shell">
+    <div class="page-wrap">
+      <!-- folders column -->
+      <section>
+        <div class="folders-header">
+          <h2 style="color:#8A4FFF;">My Space</h2>
+          <div class="folders-actions">
+            <button id="newFolderBtn" class="btn primary">+ New Folder</button>
+            <button id="resetFoldersBtn" class="btn ghost">Reset</button>
+          </div>
+        </div>
+        <div id="folderGrid" class="folder-grid"></div>
+      </section>
+
+      <!-- stats column -->
+      <aside class="stats-panel">
+        <div class="stats-header">
+          <div class="stat-title"><strong>Weekly Emotion Tracker</strong></div>
+          <div class="toggle" role="tablist" aria-label="Week toggle">
+            <button id="btnThisWeek" class="active" role="tab" aria-selected="true">This Week</button>
+            <button id="btnLastWeek" role="tab" aria-selected="false">Last Week</button>
+          </div>
+        </div>
+        <div class="bars" id="bars"></div>
+        <div class="legend" aria-label="Color legend">
+          <div class="key"><span class="dot purple"></span> higher intensity</div>
+          <div class="key"><span class="dot lavender"></span> moderate</div>
+          <div class="key"><span class="dot mint"></span> light</div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const LS_KEYS = { 
+      FOLDERS: 'mm_myspace_folders', 
+      WEEK: 'mm_stats_week',
+      ENTRIES: 'journalEntries'
+    };
+    const PALETTE = ['#8A4FFF','#C3BEF7','#E5ECF4','#EFFFFA'];
+
+    // Helper function to get entries
+    function getEntries() {
+      try {
+        return JSON.parse(localStorage.getItem(LS_KEYS.ENTRIES)) || [];
+      } catch {
+        return [];
+      }
+    }
+
+    function saveFolders(data){ localStorage.setItem(LS_KEYS.FOLDERS, JSON.stringify(data)); }
+    function loadFolders(){ try { return JSON.parse(localStorage.getItem(LS_KEYS.FOLDERS)) || null; } catch { return null; } }
+
+    const folderGrid = document.getElementById('folderGrid');
+    const newFolderBtn = document.getElementById('newFolderBtn');
+    const resetFoldersBtn = document.getElementById('resetFoldersBtn');
+
+    let folders = loadFolders() || [
+      { id: crypto.randomUUID(), name:'school', color:'#C3BEF7' },
+      { id: crypto.randomUUID(), name:'friends', color:'#EFFFFA' },
+      { id: crypto.randomUUID(), name:'family', color:'#8A4FFF' },
+      { id: crypto.randomUUID(), name:'health', color:'#E5ECF4' },
+      { id: crypto.randomUUID(), name:'hobbies', color:'#C3BEF7' },
+      { id: crypto.randomUUID(), name:'memories', color:'#EFFFFA' },
+    ];
+    saveFolders(folders);
+
+    function renderFolders() {
+      const entries = getEntries();
+      folderGrid.innerHTML = '';
+      folders.forEach((f) => {
+        // Ensure folder has a valid color
+        if (!f.color || !PALETTE.includes(f.color)) {
+          f.color = '#C3BEF7';
+        }
+        // Set default color if not set
+        if (!f.color) f.color = '#C3BEF7';
+        const folderEntries = entries.filter(e => e.folder === f.id)
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        const card = document.createElement('div');
+        card.className = 'folder-card';
+        card.draggable = true;
+        card.dataset.id = f.id;
+        card.style.background = f.color;
+
+        // Label section with name and tools
+        const label = document.createElement('div');
+        label.className = 'label';
+
+        // Create name and count wrapper
+        const nameWrapper = document.createElement('div');
+        nameWrapper.style.display = 'flex';
+        nameWrapper.style.alignItems = 'center';
+
+        const nameInput = document.createElement('input');
+        nameInput.value = f.name;
+        nameInput.setAttribute('aria-label', 'Folder name');
+        nameInput.addEventListener('change', () => {
+          f.name = nameInput.value.trim() || 'untitled';
+          saveFolders(folders);
+        });
+
+        // Add entry count badge
+        const countBadge = document.createElement('span');
+        countBadge.className = 'entry-count';
+        countBadge.textContent = folderEntries.length;
+        
+        nameWrapper.appendChild(nameInput);
+        nameWrapper.appendChild(countBadge);
+
+        const tools = document.createElement('div');
+        tools.className = 'tools';
+        const palWrap = document.createElement('div');
+        palWrap.style.display = 'flex';
+        palWrap.style.gap = '.35rem';
+
+        PALETTE.forEach(hex => {
+          const sw = document.createElement('button');
+          sw.className = 'chip palette ' + (
+            hex === '#8A4FFF' ? 'swatch-purple' :
+            hex === '#C3BEF7' ? 'swatch-lavender' :
+            hex === '#E5ECF4' ? 'swatch-bluegrey' : 'swatch-mint'
+          );
+          sw.title = hex;
+          sw.style.backgroundColor = hex;
+          sw.onclick = () => {
+            f.color = hex;
+            saveFolders(folders);
+            renderFolders();
+          };
+          palWrap.appendChild(sw);
+        });
+
+        const del = document.createElement('button');
+        del.className = 'chip delete';
+        del.textContent = 'Delete';
+        del.onclick = () => {
+          folders = folders.filter(x => x.id !== f.id);
+          saveFolders(folders);
+          renderFolders();
+        };
+
+        tools.appendChild(palWrap);
+        tools.appendChild(del);
+        label.appendChild(nameInput);
+        label.appendChild(tools);
+        card.appendChild(label);
+
+        // Entries section
+        const entriesDiv = document.createElement('div');
+        entriesDiv.className = 'entries';
+        if (folderEntries.length > 0) {
+          folderEntries.slice(0, 3).forEach(entry => {
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'entry-item';
+            entryDiv.innerHTML = `
+              <div class="entry-date">${new Date(entry.createdAt).toLocaleDateString()}</div>
+            `;
+            entryDiv.onclick = () => viewEntry(entry);
+            entriesDiv.appendChild(entryDiv);
+          });
+        } else {
+          entriesDiv.innerHTML = '<div style="text-align: center; color: #666; padding: 1rem;">No entries yet</div>';
+        }
+        
+        // Folder actions
+        const actionsDiv = document.createElement('div');
+        actionsDiv.className = 'folder-actions';
+        const newEntryBtn = document.createElement('button');
+        newEntryBtn.className = 'btn primary';
+        newEntryBtn.textContent = '+ New Entry';
+        newEntryBtn.onclick = () => createNewEntry(f.id);
+        actionsDiv.appendChild(newEntryBtn);
+        
+        if (folderEntries.length > 3) {
+          const viewAllBtn = document.createElement('button');
+          viewAllBtn.className = 'btn ghost';
+          viewAllBtn.textContent = 'View All';
+          viewAllBtn.onclick = () => viewAllEntries(f.id);
+          actionsDiv.appendChild(viewAllBtn);
+        }
+
+
+
+        card.addEventListener('dragstart', e => {
+          card.classList.add('dragging');
+          e.dataTransfer.setData('text/plain', f.id);
+        });
+        card.addEventListener('dragend', () => card.classList.remove('dragging'));
+
+        card.addEventListener('dragover', e => {
+          e.preventDefault();
+          const dragging = folderGrid.querySelector('.dragging');
+          if (!dragging || dragging === card) return;
+          const nodes = [...folderGrid.children];
+          const dragIdx = nodes.indexOf(dragging);
+          const overIdx = nodes.indexOf(card);
+          if (dragIdx < overIdx) {
+            folderGrid.insertBefore(dragging, card.nextSibling);
+          } else {
+            folderGrid.insertBefore(dragging, card);
+          }
+        });
+
+        card.addEventListener('drop', () => {
+          const newOrder = [...folderGrid.children].map(el => el.dataset.id);
+          folders.sort((a,b) => newOrder.indexOf(a.id) - newOrder.indexOf(b.id));
+          saveFolders(folders);
+          renderFolders();
+        });
+
+        card.appendChild(entriesDiv);
+        card.appendChild(actionsDiv);
+        folderGrid.appendChild(card);
+      });
+    }
+
+    function createNewEntry(folderId) {
+      // Store folder ID and redirect to journal page
+      localStorage.removeItem('journalDraft'); // Clear any existing draft
+      localStorage.setItem('currentFolderId', folderId);
+      window.location.href = 'journal.html';
+    }
+
+    function viewEntry(entry) {
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;';
+      
+      const content = document.createElement('div');
+      content.style.cssText = 'background:white;padding:2rem;border-radius:16px;width:90%;max-width:600px;position:relative;';
+      
+      content.innerHTML = `
+        <button onclick="this.closest('.modal').remove()" style="position:absolute;right:1rem;top:1rem;background:none;border:none;font-size:1.5rem;cursor:pointer;">&times;</button>
+        <h2 style="margin:0 0 1rem;color:#8A4FFF;">Journal Entry</h2>
+        <div style="margin-bottom:1rem;">
+          <strong>Date:</strong> ${new Date(entry.createdAt).toLocaleString()}<br>
+          ${entry.mood ? `<strong>Mood:</strong> ${entry.mood}<br>` : ''}
+        </div>
+        <div style="white-space:pre-wrap;margin-bottom:1.5rem;">${entry.text}</div>
+        <div style="display:flex;gap:1rem;justify-content:flex-end;">
+          <button class="btn ghost" onclick="editEntry(${entry.id})">Edit Entry</button>
+        </div>
+      `;
+      
+      modal.appendChild(content);
+      modal.className = 'modal';
+      document.body.appendChild(modal);
+      
+      modal.addEventListener('click', e => {
+        if (e.target === modal) modal.remove();
+      });
+    }
+
+    function editEntry(entryId) {
+      localStorage.setItem('editEntryId', entryId);
+      window.location.href = 'journal.html';
+    }
+
+    // Add entry deletion function
+    function deleteEntry(entryId, folderId) {
+      if (!confirm('Are you sure you want to delete this entry?')) return;
+      
+      const entries = getEntries();
+      const updatedEntries = entries.filter(e => e.id !== entryId);
+      localStorage.setItem(LS_KEYS.ENTRIES, JSON.stringify(updatedEntries));
+      viewAllEntries(folderId); // Refresh the view
+      renderFolders(); // Update folder view
+    }
+
+    function viewAllEntries(folderId) {
+      const entries = getEntries().filter(e => e.folder === folderId)
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      const modal = document.createElement('div');
+      modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:1000;';
+      
+      const content = document.createElement('div');
+      content.style.cssText = 'background:white;padding:2rem;border-radius:16px;width:90%;max-width:800px;max-height:80vh;overflow-y:auto;';
+      
+      const folder = folders.find(f => f.id === folderId);
+      content.innerHTML = `
+        <h2 style="margin:0 0 1rem;color:#8A4FFF;">${folder.name} - All Entries</h2>
+        <div style="margin-bottom:1rem;">
+          ${entries.map(entry => `
+            <div class="entry-item" style="margin-bottom:0.75rem;padding:1rem;border:1px solid #E5ECF4;border-radius:8px;">
+              <div class="entry-date" style="color:#666;font-size:0.9rem;margin-bottom:0.5rem;">${new Date(entry.createdAt).toLocaleString()}</div>
+              <div style="margin-bottom:0.5rem;">${entry.text.substring(0, 100)}${entry.text.length > 100 ? '...' : ''}</div>
+              <div style="display:flex;gap:0.5rem;justify-content:flex-end;">
+                <button class="btn secondary" onclick="viewEntry(${JSON.stringify(entry)})">View</button>
+                <button class="btn ghost" onclick="editEntry(${entry.id})">Edit</button>
+                <button class="btn ghost" onclick="deleteEntry(${entry.id}, '${folderId}')">Delete</button>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn ghost" onclick="this.closest('.modal').remove()">Close</button>
+      `;
+      
+      modal.appendChild(content);
+      modal.className = 'modal';
+      document.body.appendChild(modal);
+      
+      modal.addEventListener('click', e => {
+        if (e.target === modal) modal.remove();
+      });
+    }
+
+    newFolderBtn.addEventListener('click', () => {
+      folders.push({ id: crypto.randomUUID(), name: 'new folder', color: '#C3BEF7' });
+      saveFolders(folders);
+      renderFolders();
+    });
+
+    resetFoldersBtn.addEventListener('click', () => {
+      if (!confirm('Reset folders to demo set?')) return;
+      folders = [
+        { id: crypto.randomUUID(), name:'school', color:'#C3BEF7' },
+        { id: crypto.randomUUID(), name:'friends', color:'#EFFFFA' },
+        { id: crypto.randomUUID(), name:'family', color:'#8A4FFF' },
+        { id: crypto.randomUUID(), name:'health', color:'#E5ECF4' },
+        { id: crypto.randomUUID(), name:'hobbies', color:'#C3BEF7' },
+        { id: crypto.randomUUID(), name:'memories', color:'#EFFFFA' },
+      ];
+      saveFolders(folders);
+      renderFolders();
+    });
+
+    renderFolders();
+
+    const barsEl = document.getElementById('bars');
+    const btnThis = document.getElementById('btnThisWeek');
+    const btnLast = document.getElementById('btnLastWeek');
+
+    const DATA = {
+      thisWeek: [
+        { label:'happy', value: 78, color:'c-purple' },
+        { label:'sad', value: 22, color:'c-lavender' },
+        { label:'frustrated', value: 41, color:'c-purple' },
+        { label:'anxious', value: 35, color:'c-lavender' },
+        { label:'calm', value: 60, color:'c-mint' }
+      ],
+      lastWeek: [
+        { label:'happy', value: 65, color:'c-purple' },
+        { label:'sad', value: 30, color:'c-lavender' },
+        { label:'frustrated', value: 28, color:'c-purple' },
+        { label:'anxious', value: 40, color:'c-lavender' },
+        { label:'calm', value: 55, color:'c-mint' }
+      ]
+    };
+
+    function renderBars(weekKey){
+      barsEl.innerHTML = '';
+      DATA[weekKey].forEach(row => {
+        const wrap = document.createElement('div');
+        wrap.className = 'bar-row';
+
+        const label = document.createElement('div');
+        label.className = 'bar-label';
+        label.textContent = row.label;
+
+        const track = document.createElement('div');
+        track.className = 'bar-track';
+
+        const fill = document.createElement('div');
+        fill.className = `bar-fill ${row.color}`;
+        fill.style.width = '0%';
+        requestAnimationFrame(() => { fill.style.width = Math.max(2, Math.min(100, row.value)) + '%'; });
+
+        track.appendChild(fill);
+        wrap.appendChild(label);
+        wrap.appendChild(track);
+        barsEl.appendChild(wrap);
+      });
+
+      localStorage.setItem(LS_KEYS.WEEK, weekKey);
+      btnThis.classList.toggle('active', weekKey==='thisWeek');
+      btnLast.classList.toggle('active', weekKey!=='thisWeek');
+      btnThis.setAttribute('aria-selected', weekKey==='thisWeek');
+      btnLast.setAttribute('aria-selected', weekKey!=='thisWeek');
+    }
+
+    btnThis.addEventListener('click', () => renderBars('thisWeek'));
+    btnLast.addEventListener('click', () => renderBars('lastWeek'));
+    renderBars(localStorage.getItem(LS_KEYS.WEEK) || 'thisWeek');
+  </script>
+</body>
+</html>
