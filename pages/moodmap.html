@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mosaic Maps - Mood Map</title>
+    <link rel="stylesheet" href="../css/style.css" />
+    <style>
+        .mood-map {
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .mood-map-title {
+            text-align: center;
+            color: #8A4FFF;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+
+        .calendar-container {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(138, 79, 255, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .month-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .month-nav button {
+            background: none;
+            border: none;
+            color: #8A4FFF;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .month-nav button:hover {
+            background: rgba(138, 79, 255, 0.1);
+        }
+
+        .current-month {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
+            min-width: 200px;
+            text-align: center;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+        }
+
+        .weekday {
+            text-align: center;
+            font-weight: 600;
+            color: #666;
+            padding: 0.5rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            border: 2px solid #eee;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .calendar-day:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(138, 79, 255, 0.15);
+            border-color: #8A4FFF;
+        }
+
+        .calendar-day.empty {
+            background: #f8f8f8;
+            cursor: default;
+            border: 1px solid #eee;
+        }
+
+        .calendar-day.empty:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: #eee;
+        }
+
+        .day-number {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 1rem;
+            color: #666;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* Mood styles for calendar days using tile images */
+        .calendar-day.mood-happy {
+            background-image: url('../images/tile_happy.jpg');
+            background-size: cover;
+            background-position: center;
+            border-color: rgba(255, 217, 61, 0.5);
+        }
+
+        .calendar-day.mood-sad {
+            background-image: url('../images/tile_sad.jpg');
+            background-size: cover;
+            background-position: center;
+            border-color: rgba(108, 136, 176, 0.5);
+        }
+
+        .calendar-day.mood-frustrated {
+            background-image: url('../images/tile_frustrated.jpg');
+            background-size: cover;
+            background-position: center;
+            border-color: rgba(255, 107, 107, 0.5);
+        }
+
+        .calendar-day.mood-anxious {
+            background-image: url('../images/tile_anxious.jpg');
+            background-size: cover;
+            background-position: center;
+            border-color: rgba(151, 117, 250, 0.5);
+        }
+
+        .calendar-day.has-mood {
+            border-width: 3px;
+            overflow: hidden;
+        }
+
+        .calendar-day.has-mood .day-number {
+            color: white;
+            background: rgba(0, 0, 0, 0.4);
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        /* Mood selector tile styles */
+        .mood-icon.mood-happy {
+            background-image: url('tile_happy.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .mood-icon.mood-sad {
+            background-image: url('tile_sad.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .mood-icon.mood-frustrated {
+            background-image: url('tile_frustrated.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .mood-icon.mood-anxious {
+            background-image: url('tile_anxious.jpg');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .mood-selector {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            min-width: 400px;
+        }
+
+        .mood-selector.active {
+            display: block;
+        }
+
+        .mood-selector h3 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+        }
+
+        .mood-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .mood-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 1.2rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .mood-option:hover {
+            background: rgba(138, 79, 255, 0.05);
+            border-color: rgba(138, 79, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .mood-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .mood-option:hover .mood-icon {
+            transform: scale(1.05);
+        }
+
+        .mood-option span {
+            font-weight: 500;
+            color: #444;
+            font-size: 1.1rem;
+        }
+
+        .mood-happy { background: #FFD93D; }
+        .mood-sad { background: #6C88B0; }
+        .mood-frustrated { background: #FF6B6B; }
+        .mood-anxious { background: #9775FA; }
+
+        /* Custom mood styles */
+        .calendar-day.mood-custom {
+            position: relative;
+        }
+
+        .calendar-day.mood-custom::before {
+            content: attr(data-mood-name);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .legend {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(138, 79, 255, 0.1);
+            margin-top: 2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .legend-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .legend-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .legend-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 1rem;
+            border-radius: 10px;
+            transition: transform 0.2s ease;
+            cursor: pointer;
+        }
+
+        .legend-item:hover {
+            transform: translateY(-2px);
+            background: rgba(138, 79, 255, 0.05);
+        }
+
+        .legend-item .mood-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .legend-item span {
+            font-weight: 500;
+            color: #444;
+        }
+
+        .legend-item.custom-mood .mood-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        .custom-mood-form {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eee;
+        }
+
+        .custom-mood-form h4 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        .custom-mood-inputs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .custom-mood-inputs input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .custom-mood-inputs input[type="color"] {
+            width: 60px;
+            padding: 0.4rem;
+        }
+
+        .custom-mood-form button {
+            width: 100%;
+            padding: 0.8rem;
+            background: #8A4FFF;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .custom-mood-form button:hover {
+            background: #7340D9;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+        }
+
+        .overlay.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav>
+        <div class="logo">
+            <img src="../images/logo.png" style="height: 40px; vertical-align: middle; margin-right: 10px;">
+        </div>
+        <div class="nav-links">
+            <a href="moodmap.html" class="active">mood map</a>
+            <a href="myspace.html">my space</a>
+            <a href="journal.html">journal</a>
+            <a href="../index.html">home</a>
+            <a href="login.html">login</a>
+        </div>
+    </nav>
+
+    <!-- Mood Map Content -->
+    <section class="mood-map">
+        <h2 class="mood-map-title">Your Mood Map</h2>
+
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <div class="month-nav">
+                    <button onclick="previousMonth()">&larr;</button>
+                    <div class="current-month"></div>
+                    <button onclick="nextMonth()">&rarr;</button>
+                </div>
+            </div>
+
+            <div class="calendar-grid">
+                <!-- Weekday headers -->
+                <div class="weekday">Sun</div>
+                <div class="weekday">Mon</div>
+                <div class="weekday">Tue</div>
+                <div class="weekday">Wed</div>
+                <div class="weekday">Thu</div>
+                <div class="weekday">Fri</div>
+                <div class="weekday">Sat</div>
+                <!-- Calendar days will be inserted here by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <div class="legend-title">Mood Legend</div>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <div class="mood-icon mood-happy"></div>
+                    <span>Happy</span>
+                </div>
+                <div class="legend-item">
+                    <div class="mood-icon mood-sad"></div>
+                    <span>Sad</span>
+                </div>
+                <div class="legend-item">
+                    <div class="mood-icon mood-frustrated"></div>
+                    <span>Frustrated</span>
+                </div>
+                <div class="legend-item">
+                    <div class="mood-icon mood-anxious"></div>
+                    <span>Anxious</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mood Selector Modal -->
+    <div class="overlay" id="overlay"></div>
+    <div class="mood-selector" id="moodSelector">
+        <h3>How are you feeling today?</h3>
+        <div class="mood-options">
+            <div class="mood-option" onclick="selectMood('happy')">
+                <div class="mood-icon mood-happy"></div>
+                <span>Happy</span>
+            </div>
+            <div class="mood-option" onclick="selectMood('sad')">
+                <div class="mood-icon mood-sad"></div>
+                <span>Sad</span>
+            </div>
+            <div class="mood-option" onclick="selectMood('frustrated')">
+                <div class="mood-icon mood-frustrated"></div>
+                <span>Frustrated</span>
+            </div>
+            <div class="mood-option" onclick="selectMood('anxious')">
+                <div class="mood-icon mood-anxious"></div>
+                <span>Anxious</span>
+            </div>
+        </div>
+
+        <!-- Custom Mood Form -->
+        <div class="custom-mood-form">
+            <h4>Create Custom Mood</h4>
+            <div class="custom-mood-inputs">
+                <input type="text" id="customMoodName" placeholder="Mood name">
+                <input type="color" id="customMoodColor" value="#8A4FFF">
+            </div>
+            <button onclick="createCustomMood()">Add Custom Mood</button>
+        </div>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let selectedDate = null;
+        const moodData = JSON.parse(localStorage.getItem('moodData') || '{}');
+        const customMoods = JSON.parse(localStorage.getItem('customMoods') || '[]');
+
+        // Initialize calendar
+        function initCalendar() {
+            updateMonthDisplay();
+            renderCalendar();
+            updateLegend();
+            updateMoodSelector();
+        }
+
+        // Update month display
+        function updateMonthDisplay() {
+            const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                          'July', 'August', 'September', 'October', 'November', 'December'];
+            document.querySelector('.current-month').textContent = 
+                `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+        }
+
+        // Render calendar
+        function renderCalendar() {
+            const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            const startingDay = firstDay.getDay();
+            const totalDays = lastDay.getDate();
+
+            const calendarGrid = document.querySelector('.calendar-grid');
+            
+            // Clear existing content after weekday headers
+            while (calendarGrid.children.length > 7) {
+                calendarGrid.removeChild(calendarGrid.lastChild);
+            }
+            
+            // Add empty days from previous month
+            for (let i = 0; i < startingDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarGrid.appendChild(emptyDay);
+            }
+            
+            // Add days of current month
+            for (let day = 1; day <= totalDays; day++) {
+                const dayEl = document.createElement('div');
+                const currentKey = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${day}`;
+                const moodEntry = moodData[currentKey];
+                
+                dayEl.className = 'calendar-day';
+                if (moodEntry) {
+                    if (moodEntry.type === 'custom') {
+                        dayEl.className += ' mood-custom has-mood';
+                        dayEl.style.backgroundColor = moodEntry.color;
+                        dayEl.setAttribute('data-mood-name', moodEntry.name);
+                    } else {
+                        dayEl.className += ` mood-${moodEntry.name} has-mood`;
+                    }
+                }
+                
+                dayEl.onclick = () => openMoodSelector(day);
+                
+                const dayNumber = document.createElement('span');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = day;
+                
+                dayEl.appendChild(dayNumber);
+                calendarGrid.appendChild(dayEl);
+            }
+            
+            // Add empty days for next month to complete the grid
+            const totalCells = 42; // 6 rows × 7 days
+            const remainingDays = totalCells - (startingDay + totalDays);
+            for (let i = 0; i < remainingDays; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day empty';
+                calendarGrid.appendChild(emptyDay);
+            }
+        }
+
+        // Navigation functions
+        function previousMonth() {
+            currentDate.setMonth(currentDate.getMonth() - 1);
+            initCalendar();
+        }
+
+        function nextMonth() {
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            initCalendar();
+        }
+
+        // Mood selection functions
+        function openMoodSelector(day) {
+            selectedDate = day;
+            document.getElementById('overlay').classList.add('active');
+            document.getElementById('moodSelector').classList.add('active');
+        }
+
+        // Update legend with custom moods
+        function updateLegend() {
+            const legendItems = document.querySelector('.legend-items');
+            
+            // Remove existing custom moods
+            const customMoodElements = legendItems.querySelectorAll('.custom-mood');
+            customMoodElements.forEach(el => el.remove());
+            
+            // Add custom moods to legend
+            customMoods.forEach(mood => {
+                const legendItem = document.createElement('div');
+                legendItem.className = 'legend-item custom-mood';
+                
+                const moodIcon = document.createElement('div');
+                moodIcon.className = 'mood-icon';
+                moodIcon.style.backgroundColor = mood.color;
+                moodIcon.textContent = mood.name.charAt(0).toUpperCase();
+                
+                const moodName = document.createElement('span');
+                moodName.textContent = mood.name;
+                
+                legendItem.appendChild(moodIcon);
+                legendItem.appendChild(moodName);
+                legendItems.appendChild(legendItem);
+            });
+        }
+
+        // Update mood selector with custom moods
+        function updateMoodSelector() {
+            const moodOptions = document.querySelector('.mood-options');
+            
+            // Remove existing custom moods
+            const customMoodElements = moodOptions.querySelectorAll('.custom-mood');
+            customMoodElements.forEach(el => el.remove());
+            
+            // Add custom moods to selector
+            customMoods.forEach(mood => {
+                const moodOption = document.createElement('div');
+                moodOption.className = 'mood-option custom-mood';
+                moodOption.onclick = () => selectMood(mood.name, true);
+                
+                const moodIcon = document.createElement('div');
+                moodIcon.className = 'mood-icon';
+                moodIcon.style.backgroundColor = mood.color;
+                moodIcon.textContent = mood.name.charAt(0).toUpperCase();
+                
+                const moodName = document.createElement('span');
+                moodName.textContent = mood.name;
+                
+                moodOption.appendChild(moodIcon);
+                moodOption.appendChild(moodName);
+                moodOptions.appendChild(moodOption);
+            });
+        }
+
+        // Create custom mood
+        function createCustomMood() {
+            const nameInput = document.getElementById('customMoodName');
+            const colorInput = document.getElementById('customMoodColor');
+            const name = nameInput.value.trim().toLowerCase();
+            const color = colorInput.value;
+
+            if (name) {
+                const newMood = { name, color };
+                customMoods.push(newMood);
+                localStorage.setItem('customMoods', JSON.stringify(customMoods));
+                
+                // Reset form
+                nameInput.value = '';
+                colorInput.value = '#8A4FFF';
+                
+                // Update UI
+                updateLegend();
+                updateMoodSelector();
+            }
+        }
+
+        function selectMood(mood, isCustom = false) {
+            const key = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${selectedDate}`;
+            
+            let moodEntry;
+            if (isCustom) {
+                const customMood = customMoods.find(m => m.name === mood);
+                if (customMood) {
+                    moodEntry = {
+                        name: mood,
+                        type: 'custom',
+                        color: customMood.color
+                    };
+                }
+            } else {
+                moodEntry = {
+                    name: mood,
+                    type: 'default'
+                };
+            }
+            
+            moodData[key] = moodEntry;
+            localStorage.setItem('moodData', JSON.stringify(moodData));
+            
+            // Ask if user wants to write a journal entry
+            if (confirm('Would you like to write a journal entry for this mood?')) {
+                // Format date for the journal entry
+                const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), selectedDate);
+                const formattedDate = date.toISOString().split('T')[0];
+                
+                // Store temporary data for the journal
+                localStorage.setItem('tempMoodData', JSON.stringify({
+                    date: formattedDate,
+                    mood: mood,
+                    type: isCustom ? 'custom' : 'default',
+                    color: isCustom ? moodEntry.color : null
+                }));
+                
+                // Redirect to journal page
+                window.location.href = 'journal.html';
+            }
+            
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('moodSelector').classList.remove('active');
+            renderCalendar();
+        }
+
+        // Close mood selector when clicking overlay
+        document.getElementById('overlay').addEventListener('click', () => {
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('moodSelector').classList.remove('active');
+        });
+
+        // Initialize calendar when page loads
+        initCalendar();
+    </script>
+    <script src="../js/auth.js"></script>
+</body>
+</html>
